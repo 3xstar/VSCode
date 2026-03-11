@@ -82,4 +82,3 @@ class _NotesAppState extends State<NotesApp> {
       );
     }
 }
-
