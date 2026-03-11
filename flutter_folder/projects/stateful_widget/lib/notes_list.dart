@@ -43,42 +43,48 @@ class _NotesAppState extends State<NotesApp> {
   Widget build(BuildContext context){
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      labelText: 'Написать новую заметку',
-                      border: OutlineInputBorder(),
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("Заметки"),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: const InputDecoration(
+                        labelText: 'Написать новую заметку',
+                        border: OutlineInputBorder(),
+                      ),
+                      onSubmitted: (_) => _addTasks(),
+                      ),
                     ),
-                    onSubmitted: (_) => _addTasks(),
+                    SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _addTasks,
+                      child: Text('Добавить/сохранить'),
                     ),
-                  ),
-                  SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: _addTasks,
-                    child: Text('Добавить/сохранить'),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _tasks.length,
-                itemBuilder: (context, index){
-                  return ListTile(
-                    title: Text(_tasks[index]),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _tasks.length,
+                  itemBuilder: (context, index){
+                    return ListTile(
+                      title: Text(_tasks[index]),
                   );
                 },
-              )
-            )
+              ),
+            ),
           ],
         ),
-      );
-    }
+      ),
+    );
+  }
 }
+
