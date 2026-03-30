@@ -12,6 +12,10 @@ class LocalhostApp extends StatefulWidget {
 class _LocalhostAppState extends State<LocalhostApp> {
   List<dynamic> _students = [];
   bool _isLoading = true;
+  
+  // === НОВОЕ: Переменная для сортировки ===
+  // Варианты: 'name_asc' (А-Я), 'name_desc' (Я-А), 'score_desc' (5.0 -> 2.0), 'score_asc' (2.0 -> 5.0)
+  String _sortBy = 'name_asc'; 
 
   @override
   void initState() {
@@ -23,7 +27,10 @@ class _LocalhostAppState extends State<LocalhostApp> {
     try {
       final response = await http.post(
         Uri.parse('http://localhost/students.php'),
-        body: {'action': 'read'},
+        body: {
+          'action': 'read', 
+          'sort': _sortBy, // === ОТПРАВЛЯЕМ ПАРАМЕТР СОРТИРОВКИ НА СЕРВЕР ===
+        },
       );
 
       if (response.statusCode == 200) {
@@ -35,7 +42,7 @@ class _LocalhostAppState extends State<LocalhostApp> {
             _isLoading = false;
           });
         } else {
-          print('Ошибка сервера: ${data}');
+          print('Ошибка сервера: $data');
           setState(() => _isLoading = false);
         }
       } else {
@@ -48,27 +55,43 @@ class _LocalhostAppState extends State<LocalhostApp> {
     }
   }
 
-  Future<void> _createStudent(String name, String group_num, double average_score) async {
+  // === НОВОЕ: Переключение сортировки ===
+  void _toggleSort() {
+    setState(() {
+      if (_sortBy == 'name_asc') {
+        _sortBy = 'name_desc'; // А-Я -> Я-А
+      } else if (_sortBy == 'name_desc') {
+        _sortBy = 'score_desc'; // Я-А -> Оценка (высший сначала)
+      } else if (_sortBy == 'score_desc') {
+        _sortBy = 'score_asc'; // Оценка (высший) -> Оценка (низший)
+      } else {
+        _sortBy = 'name_asc'; // Оценка (низший) -> А-Я (круг замкнулся)
+      }
+    });
+    _loadStudents(); // Перезагружаем данные с новым параметром
+  }
+
+  Future<void> _createStudent(String name, String groupNum, double averageScore) async {
     await http.post(
       Uri.parse('http://localhost/students.php'),
       body: {
         'action': 'create',
         'name': name,
-        'group_num': group_num,
-        'average_score': average_score.toString(),
+        'group_num': groupNum,
+        'average_score': averageScore.toString(),
       },
     );
     _loadStudents();
   }
 
-  Future<void> _updateStudent(String name, String group_num, double average_score, int id) async {
+  Future<void> _updateStudent(String name, String groupNum, double averageScore, int id) async {
     await http.post(
       Uri.parse('http://localhost/students.php'),
       body: {
         'action': 'update',
         'name': name,
-        'group_num': group_num,
-        'average_score': average_score.toString(),
+        'group_num': groupNum,
+        'average_score': averageScore.toString(),
         'id': id.toString(),
       },
     );
@@ -90,19 +113,14 @@ class _LocalhostAppState extends State<LocalhostApp> {
     int? id,
     String? name,
     String? group_num,
-    dynamic average_score, // Может прийти как String или double из JSON
+    dynamic average_score,
   }) {
     final nameController = TextEditingController(text: name ?? '');
     final groupController = TextEditingController(text: group_num ?? '');
     
-    // Безопасное преобразование оценки в строку
     String scoreText = '';
     if (average_score != null) {
-      if (average_score is double) {
-        scoreText = average_score.toString();
-      } else {
-        scoreText = average_score.toString();
-      }
+      scoreText = average_score.toString();
     }
     final scoreController = TextEditingController(text: scoreText);
 
@@ -115,7 +133,7 @@ class _LocalhostAppState extends State<LocalhostApp> {
           children: [
             TextField(
               controller: nameController,
-              autofocus: true, // Только первое поле
+              autofocus: true,
               decoration: const InputDecoration(
                 labelText: 'Имя',
                 border: OutlineInputBorder(),
@@ -186,14 +204,59 @@ class _LocalhostAppState extends State<LocalhostApp> {
     );
   }
 
+  Color _getScoreColor(dynamic score) {
+    // Безопасное преобразование в double
+    double value = 0.0;
+    if (score is double) {
+      value = score;
+    } else if (score is int) {
+      value = score.toDouble();
+    } else if (score is String) {
+      value = double.tryParse(score) ?? 0.0;
+    }
+
+    if (value >= 4.5) {
+      return Colors.green;
+    } else if (value >= 3.0) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Определяем иконку и текст подсказки в зависимости от режима
+    IconData sortIcon;
+    String sortTooltip;
+
+    if (_sortBy == 'name_asc') {
+      sortIcon = Icons.sort_by_alpha; // А-Я
+      sortTooltip = 'Сортировка: Имя (А → Я)';
+    } else if (_sortBy == 'name_desc') {
+      sortIcon = Icons.sort_by_alpha; // Я-А (можно добавить зеркальную иконку, но стандартной нет)
+      sortTooltip = 'Сортировка: Имя (Я → А)';
+    } else if (_sortBy == 'score_desc') {
+      sortIcon = Icons.trending_up; // Высокий балл сверху
+      sortTooltip = 'Сортировка: Оценка (Высший → Низший)';
+    } else {
+      sortIcon = Icons.trending_down; // Низкий балл сверху
+      sortTooltip = 'Сортировка: Оценка (Низший → Высший)';
+    }
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Студенты'),
           actions: [
+            // === НОВОЕ: Кнопка сортировки ===
+            IconButton(
+              onPressed: _toggleSort,
+              icon: Icon(sortIcon),
+              tooltip: sortTooltip,
+            ),
+            // Кнопка добавления
             IconButton(
               onPressed: () => _showTaskDialog(),
               icon: const Icon(Icons.add),
@@ -207,7 +270,6 @@ class _LocalhostAppState extends State<LocalhostApp> {
                 itemBuilder: (context, index) {
                   final student = _students[index];
 
-                  // Безопасное получение данных
                   final int id = student['id'] is int
                       ? student['id']
                       : int.tryParse(student['id'].toString()) ?? 0;
@@ -218,12 +280,24 @@ class _LocalhostAppState extends State<LocalhostApp> {
 
                   return ListTile(
                     title: Text(name),
-                    subtitle: Text('Группа: $group | Балл: $score'), // Показываем больше данных
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Группа: $group'),
+                        Text(
+                          'Балл: $score', 
+                          style: TextStyle(
+                            color: _getScoreColor(score),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
                     onTap: () => _showTaskDialog(
                       id: id,
                       name: name,
-                      group_num: group,       // ПЕРЕДАЕМ ГРУППУ
-                      average_score: score,   // ПЕРЕДАЕМ ОЦЕНКУ
+                      group_num: group,
+                      average_score: score,
                     ),
                     trailing: IconButton(
                       onPressed: () => _confirmDelete(id, name),
