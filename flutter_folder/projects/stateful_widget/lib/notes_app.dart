@@ -46,8 +46,9 @@ class _LocalhostAppState extends State<LocalhostApp> {
   // === НОВОЕ: Переключение сортировки ===
   void _toggleSort() {
     setState(() {
-      if (_sortBy == 'id_desc') _sortBy = 'id_asc';
-      else if (_sortBy == 'id_asc') _sortBy = 'title_asc';
+      if (_sortBy == 'id_desc') {
+        _sortBy = 'id_asc';
+      } else if (_sortBy == 'id_asc') _sortBy = 'title_asc';
       else if (_sortBy == 'title_asc') _sortBy = 'title_desc';
       else _sortBy = 'id_desc';
     });
