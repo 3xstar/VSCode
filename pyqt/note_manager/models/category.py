@@ -1,4 +1,4 @@
 class Category:
-    def __init__(self, id, title):
+    def __init__(self, id, name):
         self.id = id
-        self.title = title
+        self.name = name

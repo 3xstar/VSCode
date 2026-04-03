@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import'package:image_picker/image_picker.dart';
+import 'package:image_picker/image_picker.dart';
+// flutter pub add image_picker
 
 // ==================== ТОЧКА ВХОДА ====================
 class NotesDB extends StatelessWidget {
@@ -308,17 +309,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  Future<void> _pickAvatar() async{
+  Future<void> _pickAvatar() async {
     final picker = ImagePicker();
     final image = await picker.pickImage(source: ImageSource.gallery);
 
-    if(image != null){
+    if (image != null) {
       var request = http.MultipartRequest(
         'POST',
         Uri.parse('http://localhost/profile.php'),
-      );
+      );  
       request.fields['action'] = 'upload_avatar';
       request.files.add(await http.MultipartFile.fromPath('avatar', image.path));
+
+      final response = await request.send();
+      if (response.statusCode == 200) {
+        _loadProfile();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('обновлено')),
+          );
+        }
+      }
     }
   }
 
@@ -336,6 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundImage: NetworkImage('http://localhost/notes_avatars/$_avatar'),
             ),
             Text(_name),
+            TextButton(onPressed: _pickAvatar, child: Text('изменить аватарку')),
           ],
         ),
       )
