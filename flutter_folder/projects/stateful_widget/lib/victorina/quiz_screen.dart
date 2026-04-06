@@ -153,7 +153,7 @@ class _QuizScreenState extends State<QuizScreen>
                   padding: const EdgeInsets.all(16.0)),
                   child: Text(option, style: const TextStyle(fontSize: 16)),
                 ),
-              )).toList(),
+              )),
             ],
           ),
         ),

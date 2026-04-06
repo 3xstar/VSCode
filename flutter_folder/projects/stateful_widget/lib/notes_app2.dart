@@ -210,16 +210,31 @@ class _AllNotesScreenState extends State<AllNotesScreen> {
                   title: Text(task['title']),
                   subtitle: Text('ID: ${task['id']}'),
                   onTap: () => _showTaskDialog(id: id, title: task['title']),
-                  onLongPress: () => _favoriteTask(id),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _confirmDelete(id, task['title']),
-                  ),
-                 
-                );
-              },
-            ),
-    );
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          // Если 1 - желтая закрашенная, если 0 - серая контурная
+                          (task['is_favorite'] == 1 || task['is_favorite'] == '1') 
+                              ? Icons.star 
+                              : Icons.star_border,
+                          color: (task['is_favorite'] == 1 || task['is_favorite'] == '1') 
+                              ? Colors.amber 
+                              : Colors.grey,
+                        ),
+                        onPressed: () => _favoriteTask(id), 
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmDelete(id, task['title']),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
   }
 }
 
