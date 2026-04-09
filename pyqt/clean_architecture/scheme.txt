@@ -8,7 +8,7 @@
                       │ использует
                       ▼
 ┌─────────────────────────────────────────────────────────┐
-│                    SERVICE LAYER                        │
+│                    APPLICATION LAYER                    │
 │  (service/task_service.py)                              │
 │  • Бизнес-сценарии (create_task, change_status)         │
 │  • Валидация данных                                     │
