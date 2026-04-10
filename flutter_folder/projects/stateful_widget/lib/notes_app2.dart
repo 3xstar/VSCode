@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
-// flutter pub add image_picker
+import 'dart:typed_data'; // Для Uint8List
+import 'package:flutter/foundation.dart' show kIsWeb; // Для проверки платформы
 
 // ==================== ТОЧКА ВХОДА ====================
 class NotesDB extends StatelessWidget {
@@ -293,6 +294,7 @@ class _FavoritesNotesScreenState extends State<FavoritesNotesScreen> {
   }
 }
 
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -302,8 +304,25 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   String _name = '';
-  String _avatar = '';
+  String _avatar = 'default.png';
   bool _isLoading = true;
+
+  // 🔹 Базовый URL API — меняйте под вашу настройку
+  String get _baseUrl {
+    if (kIsWeb) {
+      // Для Web: используйте IP или 127.0.0.1 с портом
+      // Если PHP на порту 80 (стандартный):
+      return 'http://127.0.0.1';
+      // Если PHP на порту 8080 (XAMPP по умолчанию):
+      // return 'http://127.0.0.1:8080';
+    } else {
+      // Для мобильных устройств
+      // Android Emulator:
+      return 'http://10.0.2.2';
+      // iOS Simulator:
+      // return 'http://localhost';
+    }
+  }
 
   @override 
   void initState() {
@@ -311,61 +330,135 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadProfile();
   }
 
+  // 🔹 Загрузка профиля
   Future<void> _loadProfile() async {
-    final response = await http.post(
-      Uri.parse('http://localhost/profile.php'),
-      body: {'action': 'get_profile'},
-    );
-    final data = jsonDecode(response.body);
-    setState(() {
-      _name = data['user']['name'] ;
-      _avatar = data['user']['avatar'];
-      _isLoading = false;
-    });
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/profile.php'),
+        body: {'action': 'get_profile'},
+      );
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['user'] != null) {
+          setState(() {
+            _name = data['user']['name'] ?? 'Гость';
+            _avatar = data['user']['avatar'] ?? 'default.png';
+            _isLoading = false;
+          });
+        } else {
+          setState(() => _isLoading = false);
+          debugPrint('❌ Ошибка структуры ответа: $data');
+        }
+      } else {
+        setState(() => _isLoading = false);
+        debugPrint('❌ HTTP ${response.statusCode}: ${response.body}');
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      debugPrint('❌ Исключение: $e');
+    }
   }
 
+  // 🔹 Загрузка аватарки (универсальная для Web и Mobile)
   Future<void> _pickAvatar() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final picker = ImagePicker();
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
-    if (image != null) {
-      var request = http.MultipartRequest(
+      if (image == null) return; // Пользователь отменил выбор
+
+      final request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://localhost/profile.php'),
-      );  
+        Uri.parse('$_baseUrl/profile.php'),
+      );
       request.fields['action'] = 'upload_avatar';
-      request.files.add(await http.MultipartFile.fromPath('avatar', image.path));
 
-      final response = await request.send();
-      if (response.statusCode == 200) {
-        _loadProfile();
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('обновлено')),
-          );
-        }
+      // 🔸 Ключевое различие: Web vs Mobile
+      if (kIsWeb) {
+        // 🌐 Web: читаем файл в память как байты
+        final Uint8List imageBytes = await image.readAsBytes();
+        final multipartFile = http.MultipartFile.fromBytes(
+          'avatar',
+          imageBytes,
+          filename: image.name,
+        );
+        request.files.add(multipartFile);
+      } else {
+        // 📱 Mobile: используем путь к файлу
+        final multipartFile = await http.MultipartFile.fromPath(
+          'avatar',
+          image.path,
+        );
+        request.files.add(multipartFile);
       }
+
+      // Отправляем запрос
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          if (mounted) {
+            _loadProfile(); // Обновляем данные профиля
+            _showSnackBar('✅ Аватарка обновлена', Colors.green);
+          }
+        } else {
+          _showSnackBar('❌ Ошибка: ${data['error'] ?? 'Неизвестная'}', Colors.red);
+        }
+      } else {
+        _showSnackBar('❌ Сервер вернул код ${response.statusCode}', Colors.red);
+      }
+    } catch (e) {
+      debugPrint('❌ Ошибка загрузки: $e');
+      _showSnackBar('❌ Ошибка: $e', Colors.red);
+    }
+  }
+
+  // 🔹 Вспомогательный метод для показа уведомлений
+  void _showSnackBar(String message, Color bgColor) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: bgColor,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:  AppBar(title: Text('Профиль')),
-      body: _isLoading ? Center(child: CircularProgressIndicator()) 
-      : Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 100,
-              backgroundImage: NetworkImage('http://localhost/notes_avatars/$_avatar'),
+      appBar: AppBar(title: const Text('Профиль')),
+      body: _isLoading 
+        ? const Center(child: CircularProgressIndicator()) 
+        : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 🔹 Аватарка с обработкой ошибок загрузки
+                CircleAvatar(
+                  radius: 200,
+                  backgroundColor: Colors.grey[200],
+                  backgroundImage: NetworkImage('$_baseUrl/notes_avatars/$_avatar'),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _name,
+                  style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: _pickAvatar,
+                  icon: const Icon(Icons.camera_alt),
+                  label: const Text('Изменить аватарку'),
+                ),
+              ],
             ),
-            Text(_name),
-            TextButton(onPressed: _pickAvatar, child: Text('изменить аватарку')),
-          ],
-        ),
-      )
+          ),
     );
   }
 }

@@ -1,4 +1,3 @@
-
 # 1. Конструкторная инъекция (Constructor Injection):
 class EmailService:
     def send(self, message):

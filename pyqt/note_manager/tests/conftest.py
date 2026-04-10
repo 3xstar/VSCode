@@ -90,3 +90,22 @@ def list_of_notes():
                   Note(id=3, title = "Тест3", content = "Описание3", category_id=3, user_id=3)]
     
     return notes_list
+
+def test_create_note_calls_repository_correctly(note_service, mock_note_repository, sample_note):
+    # 1. Настраиваем поведение мок-репозитория
+    mock_note_repository.create.return_value = sample_note
+
+    # 2. Вызываем метод сервиса
+    result = note_service.create_note(sample_note)
+
+    # 3. Проверяем, что метод репозитория был вызван
+    mock_note_repository.create.assert_called_once()
+
+    # 4. Проверяем аргументы вызова
+    mock_note_repository.create.assert_called_once_with(sample_note)
+
+    # 5. Проверяем количество вызовов (явная проверка)
+    assert mock_note_repository.create.call_count == 1
+
+    # 6. Проверяем, что сервис вернул ожидаемый результат
+    assert result == sample_note
