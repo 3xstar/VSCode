@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math';
 
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'dart:io';
+import 'package:getwidget/getwidget.dart';
 
 // ==================== ТОЧКА ВХОДА ====================
 class VictorinaApp extends StatelessWidget {
@@ -31,13 +31,39 @@ class VictorinaHome extends StatefulWidget {
 
 class _VictorinaHomeState extends State<VictorinaHome> {
   int _bestScore = 0;
+  String? _errorText = '';
+  late TextEditingController _usernameController;
 
   @override
   void initState() {
     super.initState();
     _loadBestScore();
+    _usernameController = TextEditingController();
   }
 
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    super.dispose();
+  }
+
+    void _validationName(String username){
+    setState(() {
+      if (username.length < 3){
+        _errorText = 'введите имя длиннее двух символов';
+      }
+      else if (username.contains(' ')) {
+        _errorText = 'в имени не должно быть пробелов';
+      }
+      else if (username.contains('захар123')) {
+        _errorText = 'одумайся';
+      }
+      else{
+        _errorText = null;
+      }
+    });
+  }
+  
   Future<void> _loadBestScore() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -45,7 +71,30 @@ class _VictorinaHomeState extends State<VictorinaHome> {
     });
   }
 
-  Future<void> _resetBestScore() async {
+  Future<void> _confirmReset() async {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Сбросить?'),
+        content: Text('Текущий рекорд: $_bestScore'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _resetBestScore();
+            },
+            child: const Text('Сбросить', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _resetBestScore() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('best_score');
     setState(() => _bestScore = 0);
@@ -60,38 +109,57 @@ class _VictorinaHomeState extends State<VictorinaHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Викторина')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Викторина',
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Text('Рекорд: $_bestScore', style: const TextStyle(fontSize: 20)),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => QuizScreen(onFinish: _saveBestScore),
-                  ),
-                );
-              },
-              child: const Padding(
-                padding: EdgeInsets.all(12.0),
-                child: Text('Начать', style: TextStyle(fontSize: 16)),
+      body: Builder(
+        builder: (BuildContext innerContext) {
+            return Padding(
+            padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Викторина',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 16),
-            TextButton(
-              onPressed: _resetBestScore,
-              child: const Text('Сбросить рекорд'),
-            ),
-          ],
-        ),
+              const SizedBox(height: 16),
+              Text('Рекорд: $_bestScore', style: const TextStyle(fontSize: 20)),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  final username = _usernameController.text.trim();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => QuizScreen(
+                        onFinish: _saveBestScore,
+                        username: username
+                        ),
+                    ),
+                  );
+                },
+                child: const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Text('Начать', style: TextStyle(fontSize: 16)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _usernameController,
+                onChanged: _validationName,
+                decoration: InputDecoration(
+                  labelText: 'Введите имя',
+                  errorText: _errorText,
+                  border: const OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: ()=> _confirmReset(),
+                  child: const Text('Сбросить рекорд'),
+              ),
+            ],
+          ),
+        );
+        }
       ),
     );
   }
@@ -109,18 +177,21 @@ class _VictorinaHomeState extends State<VictorinaHome> {
 // ==================== ЭКРАН ВИКТОРИНЫ ====================
 class QuizScreen extends StatefulWidget {
   final Function(int) onFinish;
+  final String username;
 
-  const QuizScreen({super.key, required this.onFinish});
+  const QuizScreen({super.key,
+  required this.onFinish,
+  required this.username,
+  });
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  final List<Map<String, dynamic>> _questions = [
+ final List<Map<String, dynamic>> _questions = [
     {
-      'question':
-          'Сколько кумыса можно сделать из принцессы селестии из май литл пони за раз?',
+      'question': 'Сколько кумыса можно сделать из принцессы селестии из май литл пони за раз?',
       'options': ['316 литров', '290 литров', '422 литра', '501 литр'],
       'correct': 2,
     },
@@ -135,13 +206,13 @@ class _QuizScreenState extends State<QuizScreen> {
       'correct': 1,
     },
     {
-      'question': 'Самый большой океан?',
-      'options': ['Атлантический', 'Индийский', 'Северный Ледовитый', 'Тихий'],
-      'correct': 3,
+      'question': 'Сможет ли пони твайлайт спаркл стать еврейкой?',
+      'options': ['нет', 'да', 'да, с ограничениями'],
+      'correct': 2,
     },
     {
-      'question': 'В каком году Гагарин полетел в космос?',
-      'options': ['1959', '1961', '1963', '1965'],
+      'question': 'Кто быстрее покормит зверушек, саша симпл или флаттершай?',
+      'options': ['саша симпл', 'флаттершай'],
       'correct': 1,
     },
   ];
@@ -227,8 +298,27 @@ class _QuizScreenState extends State<QuizScreen> {
           fontWeight: FontWeight.bold,
           color: Colors.lightBlueAccent
         ),
-      )
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
     );
+    tp.layout(maxWidth: width - 80);
+    tp.paint(canvas, Offset((width - tp.width)/ 2, 80));
+
+    tp = TextPainter(
+      text: TextSpan(
+        text: 'Награждается: ${widget.username}',
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Colors.purple[800],
+        ),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    tp.layout(maxWidth: width - 80);
+    tp.paint(canvas, Offset((width - tp.width)/ 2, 110));
 
     tp = TextPainter(
       text: TextSpan(
@@ -236,14 +326,22 @@ class _QuizScreenState extends State<QuizScreen> {
         style: TextStyle(
           fontSize: 26
         )
-      )
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
     );
+    tp.layout(maxWidth: width - 80);
+    tp.paint(canvas, Offset((width - tp.width)/ 2, 160));
 
     tp = TextPainter(
       text: TextSpan(
         text: _certificateMessage()
-      )
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
     );
+    tp.layout(maxWidth: width - 80);
+    tp.paint(canvas, Offset((width - tp.width)/ 2, 240));
 
     final picture = recorder.endRecording();
     final img = await picture.toImage(width.toInt(), height.toInt());
@@ -311,6 +409,7 @@ class _QuizScreenState extends State<QuizScreen> {
                 onPressed: _restart,
                 child: const Text('Играть снова'),
               ),
+              const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: _saveCertificate,
                 icon: Icon(Icons.download),

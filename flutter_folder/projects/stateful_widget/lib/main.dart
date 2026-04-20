@@ -19,12 +19,13 @@ import 'package:flutter/material.dart';
 //import 'package:stateful_widget/victorina/home_screen.dart';
 //import 'package:stateful_widget/notes_list.dart';
 //import 'package:stateful_widget/notes_app.dart';
-import 'package:stateful_widget/notes_app2.dart';
+//import 'package:stateful_widget/notes_app2.dart';
 //import 'package:stateful_widget/main_game.dart';
+import 'package:stateful_widget/victorina/pony/victorina.dart';
 
 
 void main() {
-  runApp(NotesDB());
+  runApp(VictorinaApp());
 }
 
 class MyApp extends StatelessWidget {
