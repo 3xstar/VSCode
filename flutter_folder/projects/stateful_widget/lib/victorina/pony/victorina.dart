@@ -342,6 +342,19 @@ class _QuizScreenState extends State<QuizScreen> {
     tp.layout(maxWidth: width - 80);
     tp.paint(canvas, Offset((width - tp.width)/ 2, 240));
 
+    final dateStr = DateTime.now().toString().substring(0, 10).split('-').reversed.join('.');
+    tp = TextPainter(
+      text: TextSpan(
+        text: 'Дата: $dateStr',
+        style: const TextStyle(fontSize: 14, color: Color(0xFF9E9E9E)),
+      ),
+      textAlign: TextAlign.center,
+      textDirection: TextDirection.ltr,
+    );
+    tp.layout(maxWidth: width - 80);
+    tp.paint(canvas, Offset((width - tp.width) / 2, height - 40));  // внизу, с отступом 40px
+
+
     final picture = recorder.endRecording();
     final img = await picture.toImage(width.toInt(), height.toInt());
     final ByteData = await img.toByteData(format: ui.ImageByteFormat.png);
