@@ -6,7 +6,6 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'dart:io';
-import 'package:getwidget/getwidget.dart';
 
 // ==================== ТОЧКА ВХОДА ====================
 class VictorinaApp extends StatelessWidget {
