@@ -22,11 +22,11 @@ import 'package:flutter/material.dart';
 //import 'package:stateful_widget/notes_app2.dart';
 //import 'package:stateful_widget/main_game.dart';
 //import 'package:stateful_widget/victorina/pony/victorina.dart';
-import 'package:stateful_widget/notes_tiles.dart';
-
+//import 'package:stateful_widget/notes/notes_tiles.dart';
+import 'package:stateful_widget/music_player.dart';
 
 void main() {
-  runApp(NotesTilesApp());
+  runApp(MusicPlayer());
 }
 
 class MyApp extends StatelessWidget {
