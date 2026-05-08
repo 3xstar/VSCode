@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class MusicPlayer extends StatefulWidget {
@@ -17,7 +15,7 @@ class _MusicPlayerState extends State<MusicPlayer> {
   final AudioPlayer _player = AudioPlayer(); // управление музыкой
   List <SongModel> _music = []; // список музыки
   int _currentMusic = -1; // индекс текущего трека
-  bool _isPlaying = false;
+  final bool _isPlaying = false;
   String _status = "Захар";
 
   @override
