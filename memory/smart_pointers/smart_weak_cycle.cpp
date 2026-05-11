@@ -3,6 +3,8 @@
 
 using namespace std;
 
+struct NodeB;
+
 struct NodeA{
     shared_ptr<NodeB> partner;
     ~NodeA(){
