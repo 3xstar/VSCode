@@ -25,8 +25,9 @@ import 'package:flutter/material.dart';
 //import 'package:stateful_widget/notes/notes_tiles.dart';
 //import 'package:stateful_widget/music_player.dart';
 //import 'package:stateful_widget/work_by_yourself.dart';
-import 'package:stateful_widget/aim_trainer.dart';
+//import 'package:stateful_widget/aim_trainer.dart';
+//import 'package:stateful_widget/cost_count.dart';
 
 void main() {
-  runApp(AimTrainerApp());
+//  runApp();
 }
