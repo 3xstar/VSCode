@@ -25,5 +25,5 @@ int main(){
     auto time_out = chrono::steady_clock::now();
     auto duration = time_out - time_in;
     auto ms = chrono::duration_cast<chrono::microseconds>(duration); 
-    cout << "Затраченное время на выполнения test составляет: " << ms.count() << "ms." << endl;
+    cout << "Затраченное время на выполнения test составляет: " << ms.count() << "microseconds" << endl;
 }

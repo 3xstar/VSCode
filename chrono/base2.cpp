@@ -43,6 +43,6 @@ int main(){
         cout << "Алгоритмы равны";
     }
 
-    cout << "Выборка по условию выполнялась: " << test1_mks.count() << " mks." << endl;;
-    cout << "Поиск максимального элемента выполнялся: " << test2_mks.count() << " mks." << endl;
+    cout << "Выборка по условию выполнялась: " << test1_mks.count() << "microseconds" << endl;
+    cout << "Поиск максимального элемента выполнялся: " << test2_mks.count() << "microseconds" << endl;
 }

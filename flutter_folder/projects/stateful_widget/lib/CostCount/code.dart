@@ -48,17 +48,17 @@ class _CostCountHomeState extends State<CostCountHome> {
   }
 
 
-  _saveExpense()
+  void _saveExpense()
   {
-    String title_text = _titleController.text.trim();
-    String amount_text = _amountController.text.trim();
+    String titleText = _titleController.text.trim();
+    String amountText = _amountController.text.trim();
 
-    if(title_text.isEmpty){
+    if(titleText.isEmpty){
       _showError("Название не должно быть пустым");
       return;
     }
     
-    double? amount = double.tryParse(amount_text);
+    double? amount = double.tryParse(amountText);
     
     if(amount == null){
       _showError("Сумма должна содержать только цифры");
@@ -69,7 +69,7 @@ class _CostCountHomeState extends State<CostCountHome> {
       _expenses.add(
         ExpenseItem(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
-          title: title_text,
+          title: titleText,
           amount: amount,
         ),
       );
@@ -80,11 +80,11 @@ class _CostCountHomeState extends State<CostCountHome> {
     Navigator.pop(context);
   }
 
-  _deleteExpense(String id){
+  void _deleteExpense(String id){
     setState(() => _expenses.removeWhere((item) => item.id == id));
   }
 
-  _showAddDialog(){
+  void _showAddDialog(){
     _titleController.clear();
     _amountController.clear();
       showDialog(context: context, builder: (ctx) => AlertDialog(
