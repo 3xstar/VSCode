@@ -22,7 +22,7 @@ class Vector2D{
         Vector2D operator*(double scalar) const;
         bool operator==(const Vector2D& other) const;
         bool operator!=(const Vector2D& other) const;
-        Vector2D& operator=(const Vector2D& other) const;
+        Vector2D& operator=(const Vector2D& other);
 
         friend std::ostream& operator<<(std::ostream&
         os, const Vector2D& ver);

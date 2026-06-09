@@ -1,0 +1,5 @@
+INFO: User login
+ERROR: Connection failed
+WARNING: Low memory
+INFO: Data loaded
+ERROR: Disk not found
