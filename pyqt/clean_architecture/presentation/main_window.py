@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont, QColor
-from service.task_service import TaskService
+from application.task_service import TaskService
 
 class MainWindow(QMainWindow):
     def __init__(self):
