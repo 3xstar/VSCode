@@ -1,0 +1,11 @@
+/llvm-mingw-20260210-ucrt-x86_64/
+
+*
+
+!*/
+
+!*.cs
+!*.csproj
+!*.sln
+
+!.gitignore
