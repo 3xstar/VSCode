@@ -1,4 +1,4 @@
-﻿//task 1 - 4
+﻿// task 1-4
 
 using Microsoft.Data.SqlClient;
 
@@ -15,7 +15,7 @@ Console.WriteLine("Соединение с базой данных устано�
 
 
 
-//task 5
+// task 5
 
 Console.WriteLine("\nTask 5");
 
@@ -81,7 +81,7 @@ Console.WriteLine("\nTask 8");
 
 string sql_products_count = """
     SELECT COUNT(*)
-    FROM Products;
+    FROM products;
 """;
 
 using var product_command = new SqlCommand(sql_products_count, connection);
@@ -102,7 +102,7 @@ Console.WriteLine("\nTask 9");
 //     SELECT TOP 1
 //         name,
 //         price
-//     FROM Products
+//     FROM products
 //     ORDER BY price DESC;
 // """;
 
@@ -110,7 +110,7 @@ Console.WriteLine("\nTask 9");
 
 string sql_max_price_product = """
     SELECT MAX(price)
-    FROM Products;
+    FROM products;
 """;
 
 using var max_price_product_command = new SqlCommand(sql_max_price_product, connection);
@@ -145,7 +145,7 @@ Console.WriteLine($"SQL Server: {serverFinalName}");
 
 string sql_final_products_count = """
     SELECT COUNT(*)
-    FROM Products;
+    FROM products;
 """;
 
 using var product_final_command = new SqlCommand(sql_final_products_count, connection);
@@ -157,7 +157,7 @@ Console.WriteLine($"Количество товаров: {productFinalCount}");
 
 string sql_final_min_price_product = """
     SELECT MIN(price)
-    FROM Products;
+    FROM products;
 """;
 
 using var min_price_product_final_command = new SqlCommand(sql_final_min_price_product, connection);
@@ -169,7 +169,7 @@ Console.WriteLine($"Максимальная цена товара: {minPriceFin
 
 string sql_final_max_price_product = """
     SELECT MAX(price)
-    FROM Products;
+    FROM products;
 """;
 
 using var max_price_product_final_command = new SqlCommand(sql_final_max_price_product, connection);
