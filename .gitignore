@@ -9,3 +9,13 @@
 !*.sln
 
 !.gitignore
+
+/llvm-mingw-20260210-ucrt-x86_64/
+
+!*.py
+!*.txt
+!*.md
+!*.json
+!*.yml
+!*.yaml
+!.gitignore
