@@ -197,130 +197,158 @@ reader5.Close();
 
 // part 8
 
-Console.WriteLine("\nPart 8.1");
+Console.WriteLine("\nPart 8");
 
-string sql8_1 = @"
-    SELECT id, name, price, is_available
-    FROM products
-    WHERE is_available = 1
-    ORDER BY price ASC;";
 
-using SqlCommand command8_1 = new SqlCommand(sql8_1, connection);
-using SqlDataReader reader8_1 = command8_1.ExecuteReader();
-
-if (reader8_1.HasRows)
+while (true)
 {
-    while (reader8_1.Read())
+    Console.WriteLine("--- PRODUCT_CLIENT_ORDER MENU ---");
+    Console.WriteLine("1. Доступные товары по возрастанию цены");
+    Console.WriteLine("2. Поиск товаров дороже заданной цены");
+    Console.WriteLine("3. Поиск клиента по части Ф. И. О.");
+    Console.WriteLine("4. Вывод заказов по статусу");
+    Console.WriteLine("0. Выход из программы");
+    Console.Write("Выберите пункт меню: ");
+
+    string choice = Console.ReadLine()!;
+
+    if (choice == "0")
     {
-        int id = reader8_1.GetInt32(0);
-        string name = reader8_1.GetString(1);
-        decimal price = reader8_1.GetDecimal(2);
-        Console.WriteLine($"{id}. {name} — {price} руб.");
+        Console.WriteLine("Выход из программы");
+        break;
+    }
+
+    switch (choice)
+    {
+        case "1":
+            string sql8_1 = @"
+                SELECT id, name, price, is_available
+                FROM products
+                WHERE is_available = 1
+                ORDER BY price ASC;";
+
+            using (SqlCommand command8_1 = new SqlCommand(sql8_1, connection))
+            using (SqlDataReader reader8_1 = command8_1.ExecuteReader())
+            {
+                if (reader8_1.HasRows)
+                {
+                    while (reader8_1.Read())
+                    {
+                        int id = reader8_1.GetInt32(0);
+                        string name = reader8_1.GetString(1);
+                        decimal price = reader8_1.GetDecimal(2);
+                        Console.WriteLine($"{id}. {name} — {price} руб.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Доступные товары не найдены");
+                }
+            }
+            break;
+
+        case "2":
+            Console.Write("Введите минимальную цену: ");
+            decimal minPrice = Convert.ToDecimal(Console.ReadLine());
+
+            string sql8_2 = @"
+                SELECT id, name, price
+                FROM products
+                WHERE price > @minPrice;";
+
+            using (SqlCommand command8_2 = new SqlCommand(sql8_2, connection))
+            {
+                command8_2.Parameters.AddWithValue("@minPrice", minPrice);
+                using (SqlDataReader reader8_2 = command8_2.ExecuteReader())
+                {
+                    if (reader8_2.HasRows)
+                    {
+                        while (reader8_2.Read())
+                        {
+                            int id = reader8_2.GetInt32(0);
+                            string name = reader8_2.GetString(1);
+                            decimal price = reader8_2.GetDecimal(2);
+                            Console.WriteLine($"{id}. {name} — {price} руб.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Товары дороже {minPrice} руб. не найдены");
+                    }
+                }
+            }
+            break;
+
+        case "3":
+            Console.Write("Введите часть имени клиента: ");
+            string searchName = Console.ReadLine()!;
+
+            string sql8_3 = @"
+                SELECT id, full_name, phone, email
+                FROM customers
+                WHERE full_name LIKE @searchName;";
+
+            using (SqlCommand command8_3 = new SqlCommand(sql8_3, connection))
+            {
+                command8_3.Parameters.AddWithValue("@searchName", $"%{searchName}%");
+                using (SqlDataReader reader8_3 = command8_3.ExecuteReader())
+                {
+                    if (reader8_3.HasRows)
+                    {
+                        while (reader8_3.Read())
+                        {
+                            int id = reader8_3.GetInt32(0);
+                            string fullName = reader8_3.GetString(1);
+                            string phone = reader8_3.GetString(2);
+                            string email = reader8_3.IsDBNull(3) ? "Не указан" : reader8_3.GetString(3);
+
+                            Console.WriteLine($"Клиент №{id}: {fullName} | Тел: {phone} | Email: {email}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Клиенты с ФИО, содержащим '{searchName}', не найдены");
+                    }
+                }
+            }
+            break;
+
+        case "4":
+            Console.Write("Введите статус заказа (Выполнен, В обработке, Выдан): ");
+            string searchStatus = Console.ReadLine()!;
+
+            string sql8_4 = @"
+                SELECT id, customer_id, order_date, status
+                FROM orders
+                WHERE status = @status;";
+
+            using (SqlCommand command8_4 = new SqlCommand(sql8_4, connection))
+            {
+                command8_4.Parameters.AddWithValue("@status", searchStatus);
+                using (SqlDataReader reader8_4 = command8_4.ExecuteReader())
+                {
+                    if (reader8_4.HasRows)
+                    {
+                        while (reader8_4.Read())
+                        {
+                            int id = reader8_4.GetInt32(0);
+                            int customerId = reader8_4.GetInt32(1);
+                            DateTime orderDate = reader8_4.GetDateTime(2);
+                            string status = reader8_4.GetString(3);
+
+                            Console.WriteLine($"Заказ №{id} | ID Клиента: {customerId} | Дата: {orderDate:dd.MM.yyyy} | Status: {status}");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Заказы со статусом '{searchStatus}' не найдены");
+                    }
+                }
+            }
+            break;
+
+        default:
+            Console.WriteLine("Неверное значение, попробуйте еще раз");
+            break;
     }
 }
-else
-{
-    Console.WriteLine("Доступные товары не найдены");
-}
-reader8_1.Close();
-
-
-Console.WriteLine("\nPart 8.2");
-
-Console.Write("Введите минимальную цену товара: ");
-decimal minPrice = Convert.ToDecimal(Console.ReadLine());
-
-string sql8_2 = @"
-    SELECT id, name, price
-    FROM products
-    WHERE price > @minPrice;";
-
-using SqlCommand command8_2 = new SqlCommand(sql8_2, connection);
-command8_2.Parameters.AddWithValue("@minPrice", minPrice);
-
-using SqlDataReader reader8_2 = command8_2.ExecuteReader();
-
-if (reader8_2.HasRows)
-{
-    while (reader8_2.Read())
-    {
-        int id = reader8_2.GetInt32(0);
-        string name = reader8_2.GetString(1);
-        decimal price = reader8_2.GetDecimal(2);
-        Console.WriteLine($"{id}. {name} — {price} руб.");
-    }
-}
-else
-{
-    Console.WriteLine($"Товары дороже {minPrice} руб. не найдены");
-}
-reader8_2.Close();
-
-
-Console.WriteLine("\nPart 8.3");
-
-Console.Write("Введите часть имени клиента: ");
-string searchName = Console.ReadLine()!;
-
-string sql8_3 = @"
-    SELECT id, full_name, phone, email
-    FROM customers
-    WHERE full_name LIKE @searchName;";
-
-using SqlCommand command8_3 = new SqlCommand(sql8_3, connection);
-command8_3.Parameters.AddWithValue("@searchName", $"%{searchName}%");
-
-using SqlDataReader reader8_3 = command8_3.ExecuteReader();
-
-if (reader8_3.HasRows)
-{
-    while (reader8_3.Read())
-    {
-        int id = reader8_3.GetInt32(0);
-        string fullName = reader8_3.GetString(1);
-        string phone = reader8_3.GetString(2);
-        string email = reader8_3.IsDBNull(3) ? "Не указан" : reader8_3.GetString(3);
-
-        Console.WriteLine($"Клиент №{id}: {fullName} | Тел: {phone} | Email: {email}");
-    }
-}
-else
-{
-    Console.WriteLine($"Клиенты с ФИО, содержащим '{searchName}', не найдены");
-}
-reader8_3.Close();
-
-
-Console.WriteLine("\nPart 8.4");
-
-Console.Write("Введите статус заказа (например: Выполнен, В обработке, Выдан): ");
-string searchStatus = Console.ReadLine()!;
-
-string sql8_4 = @"
-    SELECT id, customer_id, order_date, status
-    FROM orders
-    WHERE status = @status;";
-
-using SqlCommand command8_4 = new SqlCommand(sql8_4, connection);
-command8_4.Parameters.AddWithValue("@status", searchStatus);
-
-using SqlDataReader reader8_4 = command8_4.ExecuteReader();
-
-if (reader8_4.HasRows)
-{
-    while (reader8_4.Read())
-    {
-        int id = reader8_4.GetInt32(0);
-        int customerId = reader8_4.GetInt32(1);
-        DateTime orderDate = reader8_4.GetDateTime(2);
-        string status = reader8_4.GetString(3);
-
-        Console.WriteLine($"Заказ №{id} | ID Клиента: {customerId} | Дата: {orderDate:dd.MM.yyyy} | Статус: {status}");
-    }
-}
-else
-{
-    Console.WriteLine($"Заказы со статусом '{searchStatus}' не найдены");
-}
-reader8_4.Close();
- 
