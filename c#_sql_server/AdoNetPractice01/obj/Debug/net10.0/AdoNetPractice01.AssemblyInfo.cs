@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AdoNetPractice01")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2c2c6f9dc7e226189af840b83dbd9994a5d7168e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+72a93b8d8cd6405e57d312cae995c30e31fc5766")]
 [assembly: System.Reflection.AssemblyProductAttribute("AdoNetPractice01")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AdoNetPractice01")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

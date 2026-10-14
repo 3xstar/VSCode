@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "c:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\AdoNetPractice05.csproj": {}
+    "C:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\AdoNetPractice05.csproj": {}
   },
   "projects": {
-    "c:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\AdoNetPractice05.csproj": {
+    "C:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\AdoNetPractice05.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "c:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\AdoNetPractice05.csproj",
+        "projectUniqueName": "C:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\AdoNetPractice05.csproj",
         "projectName": "AdoNetPractice05",
-        "projectPath": "c:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\AdoNetPractice05.csproj",
+        "projectPath": "C:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\AdoNetPractice05.csproj",
         "packagesPath": "C:\\Users\\tmrni\\.nuget\\packages\\",
-        "outputPath": "c:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\obj\\",
+        "outputPath": "C:\\VSCODE\\c#_sql_server\\AdoNetPractice05\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
