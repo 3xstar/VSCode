@@ -1,0 +1,19 @@
+services:
+  web:
+    build: .
+    container_name: lab-flask-sqlalchemy
+    ports:
+      - "5000:5000"
+    environment:
+      # Путь к файлу БД внутри контейнера (совпадает с точкой монтирования тома)
+      DB_PATH: /data/data.db
+      FLASK_ENV: development
+    volumes:
+      # Именованный том: сохраняет data.db между перезапусками
+      - sqlite-data:/data
+      # Bind mount: правки app.py применяются без пересборки образа
+      - ./app.py:/app/app.py
+    restart: unless-stopped
+
+volumes:
+  sqlite-data:
