@@ -1,19 +1,18 @@
+flutter_folder/flutter/
+
+
 llvm-mingw-20260210-ucrt-x86_64/
-__pycache__/
-obj/
-bin/
 
-*
-!*/
 
-!*.cs
-!*.csproj
-!*.sln
-!*.py
-!*.txt
-!*.md
-!*.json
-!*.yml
-!*.yaml
+**/obj/
+**/bin/
 
-!.gitignore
+
+**/.dart_tool/
+**/.gradle/
+**/build/
+**/__pycache__/
+
+
+.vscode/
+.env
