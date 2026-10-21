@@ -1,21 +1,18 @@
-/llvm-mingw-20260210-ucrt-x86_64/
+llvm-mingw-20260210-ucrt-x86_64/
+__pycache__/
+obj/
 
 *
-
 !*/
 
 !*.cs
 !*.csproj
 !*.sln
-
-!.gitignore
-
-/llvm-mingw-20260210-ucrt-x86_64/
-
 !*.py
 !*.txt
 !*.md
 !*.json
 !*.yml
 !*.yaml
+
 !.gitignore
