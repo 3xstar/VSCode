@@ -1,6 +1,7 @@
 llvm-mingw-20260210-ucrt-x86_64/
 __pycache__/
 obj/
+bin/
 
 *
 !*/
