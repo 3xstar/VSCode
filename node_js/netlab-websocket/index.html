@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>NetLab Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 35px auto;
+      padding: 0 15px;
+    }
+    input, button {
+      padding: 9px;
+      margin: 5px 0;
+    }
+    #messages {
+      height: 240px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 12px;
+      list-style: none;
+    }
+    #messages li {
+      margin-bottom: 7px;
+    }
+    #message {
+      width: 68%;
+    }
+    #users {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>NetLab Chat</h1>
+  <input id="name" placeholder="Ваше имя" maxlength="20">
+  <button id="connect">Подключиться</button>
+  <button id="disconnect" disabled>Отключиться</button>
+  <p id="status">Не подключено</p>
+  <p id="users">Онлайн: —</p>
+  <p id="stats">Всего сообщений: 0</p>
+  <ul id="messages"></ul>
+  <input id="message" placeholder="Сообщение" maxlength="200">
+  <button id="send" disabled>Отправить</button>
+
+  <script>
+    const nameInput = document.querySelector('#name');
+    const connectBtn = document.querySelector('#connect');
+    const disconnectBtn = document.querySelector('#disconnect');
+    const sendBtn = document.querySelector('#send');
+    const messageInput = document.querySelector('#message');
+    const list = document.querySelector('#messages');
+    const status = document.querySelector('#status');
+    const users = document.querySelector('#users');
+    const stats = document.querySelector('#stats');
+    let socket = null;
+
+    function line(text) {
+      const item = document.createElement('li');
+      item.textContent = text;
+      list.append(item);
+      list.scrollTop = list.scrollHeight;
+    }
+
+    connectBtn.addEventListener('click', () => {
+      const name = nameInput.value.trim();
+      if (!name || name.length > 20) {
+        line('Укажите имя длиной 1–20 символов');
+        return;
+      }
+
+      const url = 'ws://' + location.host + '/ws';
+      socket = new WebSocket(url);
+      connectBtn.disabled = true;
+      status.textContent = 'Подключаемся...';
+
+      socket.addEventListener('open', () => {
+        status.textContent = 'Подключено';
+        sendBtn.disabled = false;
+        disconnectBtn.disabled = false;
+        socket.send(JSON.stringify({
+          type: 'join',
+          name
+        }));
+      });
+
+      socket.addEventListener('message', (event) => {
+        let packet;
+        try {
+          packet = JSON.parse(event.data);
+        } catch {
+          line('Некорректный ответ сервера');
+          return;
+        }
+
+        if (packet.type === 'chat') {
+          line('[' + packet.time + '] ' + packet.name + ': ' + packet.text);
+        } else if (packet.type === 'system' || packet.type === 'info') {
+          line('[Система] ' + packet.text);
+        } else if (packet.type === 'online') {
+          users.textContent = 'Онлайн: ' + packet.users.join(', ');
+        } else if (packet.type === 'error') {
+          line('[Ошибка] ' + packet.code + ': ' + packet.message);
+        } else if (packet.type === 'stats') {
+          stats.textContent = 'Всего сообщений: ' + packet.count;
+        }
+      });
+
+      socket.addEventListener('close', (event) => {
+        status.textContent = 'Отключено (код ' + event.code + ')';
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+        sendBtn.disabled = true;
+        users.textContent = 'Онлайн: —';
+        line('[Система] Соединение закрыто');
+      });
+
+      socket.addEventListener('error', () => {
+        line('[Ошибка] Проблема с WebSocket');
+      });
+    });
+
+    sendBtn.addEventListener('click', () => {
+      const text = messageInput.value.trim();
+      if (!text || !socket || socket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      socket.send(JSON.stringify({
+        type: 'chat',
+        text
+      }));
+      messageInput.value = '';
+    });
+
+    messageInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') sendBtn.click();
+    });
+
+    disconnectBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.close(1000, 'Выход из чата');
+      }
+    });
+  </script>
+</body>
+</html>
